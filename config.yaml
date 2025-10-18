@@ -1,0 +1,56 @@
+# Mixer System Configuration
+
+project:
+  name: "hey-mixer"
+  version: "1.0.0"
+
+# GitHub integration
+github:
+  enabled: true
+  repo: "robert-mixer/hey-mixer"
+
+  stash:
+    use_issues: true
+
+  auth:
+    token_env: "GITHUB_TOKEN"
+
+# Linear integration
+linear:
+  enabled: true
+  workspace: "Mixer"
+  team_id: "SYS"
+
+  tickets:
+    goal_label: "goal"
+    plan_label: "plan"
+
+    statuses:
+      draft: "Draft"
+      todo: "Todo"
+      doing: "In Progress"
+      done: "Done"
+      closed: "Canceled"
+
+  auth:
+    api_key_env: "LINEAR_API_KEY"
+
+# Module types
+modules:
+  base_dir: "modules/"
+
+  types:
+    - name: "general"
+      enabled: true
+      description: "General purpose modules"
+
+# Agent behavior
+agents:
+  goal_builder:
+    timezone: "America/Los_Angeles"
+
+  plan_builder:
+    timezone: "America/Los_Angeles"
+
+  module_builder:
+    timezone: "America/Los_Angeles"
