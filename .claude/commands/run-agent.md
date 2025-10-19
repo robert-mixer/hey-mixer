@@ -13,15 +13,29 @@ Run with agent name: `goal-builder`, `plan-builder`, or `module-builder`
 
 ## 🔴 CRITICAL RULES - NEVER FORGET
 
-### 1. ALWAYS Press Enter (C-m)
-```bash
-# WRONG - Command won't execute, agent appears stuck
-tmux send-keys -t session "command"
+### 1. TWO-STEP COMMAND SENDING (CRITICAL!)
+Claude agents require TWO SEPARATE tmux operations:
+1. First: Send the prompt text WITHOUT C-m
+2. Second: Send C-m in a SEPARATE command
 
-# CORRECT - Command will execute
-tmux send-keys -t session "command" C-m
+```bash
+# WRONG - Sending text and Enter together WILL NOT WORK
+tmux send-keys -t session "Show me the issues" C-m
+
+# CORRECT - Must be TWO SEPARATE COMMANDS
+tmux send-keys -t session "Show me the issues"    # Step 1: Send text
+tmux send-keys -t session C-m                      # Step 2: Send Enter
+
+# Or if you prefer one line (but still two operations):
+tmux send-keys -t session "Show me the issues" && tmux send-keys -t session C-m
 ```
-**Without C-m, commands WILL NOT execute!** If agent seems stuck, send C-m.
+
+**⚠️ CRITICAL: Claude agents wait for the FULL prompt before executing. If you send text+C-m together, the agent won't process it correctly!**
+
+If agent seems stuck after sending a command, send C-m separately:
+```bash
+tmux send-keys -t session C-m
+```
 
 ### 2. User Confirmation is MANDATORY
 **ALWAYS confirm with user before proceeding at key points:**
@@ -60,11 +74,13 @@ tmux send-keys -t session "command" C-m
 
 Example:
 ```bash
-# Creative - USE ultrathink
-tmux send-keys -t session "Draft a comprehensive goal for this authentication system. Include all technical requirements. ultrathink" C-m
+# Creative - USE ultrathink (TWO STEPS!)
+tmux send-keys -t session "Draft a comprehensive goal for this authentication system. Include all technical requirements. ultrathink"
+tmux send-keys -t session C-m
 
-# Simple - NO ultrathink
-tmux send-keys -t session "Show me the GitHub issues" C-m
+# Simple - NO ultrathink (TWO STEPS!)
+tmux send-keys -t session "Show me the GitHub issues"
+tmux send-keys -t session C-m
 ```
 
 ### 4. Strict Scope Management
@@ -100,8 +116,9 @@ sleep 5
 
 ### Phase 2: Initial Contact
 ```bash
-# Send greeting to trigger startup message
-tmux send-keys -t $ARGUMENTS-session "Hello" C-m
+# Send greeting to trigger startup message (TWO STEPS!)
+tmux send-keys -t $ARGUMENTS-session "Hello"
+tmux send-keys -t $ARGUMENTS-session C-m
 
 # Wait for response
 sleep 10
@@ -114,8 +131,9 @@ tmux capture-pane -t $ARGUMENTS-session -p | tail -30
 
 #### GOAL BUILDER Workflow
 ```bash
-# 1. Show issues (no ultrathink)
-tmux send-keys -t goal-builder-session "Show me all GitHub issues" C-m
+# 1. Show issues (no ultrathink) - TWO STEPS!
+tmux send-keys -t goal-builder-session "Show me all GitHub issues"
+tmux send-keys -t goal-builder-session C-m
 sleep 10
 
 # 2. CHECK WITH USER
@@ -123,20 +141,23 @@ sleep 10
 Which ones should we create goals for?
 Should we combine any of them?"
 
-# 3. After user selects issue(s)
-tmux send-keys -t goal-builder-session "Let's create a goal for issue #X. Draft something comprehensive. ultrathink" C-m
+# 3. After user selects issue(s) - TWO STEPS!
+tmux send-keys -t goal-builder-session "Let's create a goal for issue #X. Draft something comprehensive. ultrathink"
+tmux send-keys -t goal-builder-session C-m
 sleep 20
 
 # 4. CHECK WITH USER
 "The agent drafted: [summary]
 Any changes needed? Should we add anything?"
 
-# 5. If approved
-tmux send-keys -t goal-builder-session "Perfect! Save this draft first" C-m
+# 5. If approved - TWO STEPS!
+tmux send-keys -t goal-builder-session "Perfect! Save this draft first"
+tmux send-keys -t goal-builder-session C-m
 sleep 10
 
-# 6. Create goal
-tmux send-keys -t goal-builder-session "Now create the goal in Linear" C-m
+# 6. Create goal - TWO STEPS!
+tmux send-keys -t goal-builder-session "Now create the goal in Linear"
+tmux send-keys -t goal-builder-session C-m
 sleep 15
 
 # 7. Confirm completion
@@ -145,41 +166,47 @@ sleep 15
 
 #### PLAN BUILDER Workflow
 ```bash
-# 1. Show available goals
-tmux send-keys -t plan-builder-session "Show goals with todo status" C-m
+# 1. Show available goals - TWO STEPS!
+tmux send-keys -t plan-builder-session "Show goals with todo status"
+tmux send-keys -t plan-builder-session C-m
 sleep 10
 
 # 2. CHECK WITH USER
 "Found these goals ready for planning: [list]
 Which one should we create a plan for?"
 
-# 3. Analyze selected goal
-tmux send-keys -t plan-builder-session "Analyze goal AUTH-123" C-m
+# 3. Analyze selected goal - TWO STEPS!
+tmux send-keys -t plan-builder-session "Analyze goal AUTH-123"
+tmux send-keys -t plan-builder-session C-m
 sleep 15
 
-# 4. Draft plan (creative task)
-tmux send-keys -t plan-builder-session "Create a detailed implementation plan. Break it into clear steps. ultrathink" C-m
+# 4. Draft plan (creative task) - TWO STEPS!
+tmux send-keys -t plan-builder-session "Create a detailed implementation plan. Break it into clear steps. ultrathink"
+tmux send-keys -t plan-builder-session C-m
 sleep 20
 
 # 5. CHECK WITH USER
 "Plan includes: [summary of steps]
 Look good? Any technical preferences?"
 
-# 6. Create plan
-tmux send-keys -t plan-builder-session "Create this plan in Linear" C-m
+# 6. Create plan - TWO STEPS!
+tmux send-keys -t plan-builder-session "Create this plan in Linear"
+tmux send-keys -t plan-builder-session C-m
 ```
 
 #### MODULE BUILDER Workflow
 ```bash
-# 1. Show ready plans
-tmux send-keys -t module-builder-session "Show plans with todo status" C-m
+# 1. Show ready plans - TWO STEPS!
+tmux send-keys -t module-builder-session "Show plans with todo status"
+tmux send-keys -t module-builder-session C-m
 
 # 2. CHECK WITH USER
 "These plans are ready: [list]
 Which should we implement?"
 
-# 3. Start implementation
-tmux send-keys -t module-builder-session "Implement plan PLAN-123. Create the complete module. ultrathink" C-m
+# 3. Start implementation - TWO STEPS!
+tmux send-keys -t module-builder-session "Implement plan PLAN-123. Create the complete module. ultrathink"
+tmux send-keys -t module-builder-session C-m
 
 # 4. Monitor progress
 # Module builder may take longer, keep checking
@@ -225,8 +252,12 @@ Which approach?
 
 ### Essential Commands
 ```bash
-# Send command (ALWAYS with C-m!)
-tmux send-keys -t session "text" C-m
+# Send command (ALWAYS TWO STEPS!)
+tmux send-keys -t session "text"    # Step 1: Send text
+tmux send-keys -t session C-m        # Step 2: Send Enter
+
+# Or combined (but still two operations):
+tmux send-keys -t session "text" && tmux send-keys -t session C-m
 
 # Capture output
 tmux capture-pane -t session -p
@@ -327,25 +358,31 @@ tmux capture-pane -t session -p | grep -i "thinking\|contemplating"
 ```bash
 # User: "Create a goal from issue #5"
 
-# You: Check issue first
-tmux send-keys -t session "Show issues" C-m
+# You: Check issue first (TWO STEPS!)
+tmux send-keys -t session "Show issues"
+tmux send-keys -t session C-m
 # Confirm: "Issue #5 is about auth. Create goal for this?"
 
-# User: "Yes"
-tmux send-keys -t session "Create comprehensive goal for issue #5 about authentication. ultrathink" C-m
+# User: "Yes" (TWO STEPS!)
+tmux send-keys -t session "Create comprehensive goal for issue #5 about authentication. ultrathink"
+tmux send-keys -t session C-m
 # Show draft: "Agent drafted [summary]. Proceed?"
 
-# User: "Yes"
-tmux send-keys -t session "Save and create goal" C-m
+# User: "Yes" (TWO STEPS!)
+tmux send-keys -t session "Save and create goal"
+tmux send-keys -t session C-m
 ```
 
 ### Bad Interaction (DON'T DO THIS)
 ```bash
 # User: "Create a goal from issue #5"
 
+# DON'T: Send text and C-m together (won't work!)
+tmux send-keys -t session "Show issues" C-m  # WRONG!
+
 # DON'T: Jump straight to creation without confirming
 # DON'T: Add features not in issue without asking
-# DON'T: Forget C-m and wonder why it's stuck
+# DON'T: Forget to send C-m separately
 # DON'T: Use ultrathink for "show issues"
 ```
 
@@ -360,7 +397,10 @@ echo "To detach: Ctrl+B, then D"
 
 ## 🔴 NEVER FORGET
 
-1. **C-m after EVERY command** - Or it won't run!
+1. **TWO-STEP SENDING IS MANDATORY** - Send text first, THEN send C-m separately!
+   - Step 1: `tmux send-keys -t session "text"`
+   - Step 2: `tmux send-keys -t session C-m`
+   - NEVER combine them or the agent won't respond!
 2. **Confirm with user** - At every decision point!
 3. **ultrathink for creative only** - Not for simple tasks!
 4. **Stay in scope** - Don't invent content!
