@@ -1,6 +1,8 @@
 ---
-description: Create a goal ticket from GitHub issues (interactive)
-allowed-tools: Bash, Write, Read
+description: Interactively create a Linear goal ticket from selected GitHub issues
+allowed-tools: Bash(python:.claude/scripts/goal-builder/*), Write, Read
+argument-hint: [issue-numbers]
+disable-model-invocation: false
 ---
 
 # Create Goal Ticket
