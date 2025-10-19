@@ -9,17 +9,24 @@ disable-model-invocation: false
 
 Work with the user to create a Linear goal ticket from GitHub issues.
 
-## CRITICAL WORKFLOW
+## 🚨 CRITICAL RULE - NEVER SHOW DRAFTS IN CHAT 🚨
 
-**⚠️ IMPORTANT: Direct file writing and iterative refinement**
-1. Draft content with user directly in `.tmp/`
-2. **IMMEDIATELY WRITE to `.tmp/goal-draft.md` using Write tool BEFORE asking for approval**
-3. Show the written file to user (use Read tool)
-4. If user gives feedback → Edit the file directly (use Edit tool)
-5. Keep editing until user explicitly approves
-6. ONLY create in Linear after explicit approval ("approved", "create it", "looks good")
+**THIS IS THE #1 RULE: You MUST write drafts DIRECTLY to file WITHOUT showing them in chat first!**
 
-**NEVER show draft in chat then save it. ALWAYS write directly to file first!**
+### ❌ WRONG WAY (NEVER DO THIS):
+1. ❌ Draft content in your response
+2. ❌ Show the draft to the user in chat
+3. ❌ Ask "What do you think of this draft?"
+4. ❌ Then save it to a file
+
+### ✅ CORRECT WAY (ALWAYS DO THIS):
+1. ✅ Think about the content internally
+2. ✅ IMMEDIATELY use Write tool to save to `.tmp/goal-draft.md`
+3. ✅ Use Read tool to show the file to user
+4. ✅ Use Edit tool to refine based on feedback
+5. ✅ Only create in Linear after explicit approval
+
+**If you show a draft in chat before writing to file, you have FAILED this workflow!**
 
 ## Process
 
@@ -33,14 +40,14 @@ First, get the list of open issues:
 python .claude/scripts/goal-builder/list_issues.py
 ```
 
-### 2. Draft Ticket Content Interactively
+### 2. CONTINUOUSLY Write and Update Draft File During Discussion
 
-**CRITICAL**: Don't auto-generate content. WRITE THE ACTUAL TICKET with the user:
+**FROM THE VERY FIRST MESSAGE: Start writing to `.tmp/goal-draft.md` IMMEDIATELY!**
 
-- Discuss which issues to include
-- Plan the goal ticket structure
-- **DO NOT display the full draft in chat**
-- **Instead, go directly to step 3 to write it to file**
+- As SOON as you start discussing, create the draft file
+- EVERY time you discuss a new idea, update the file
+- CONTINUOUSLY save progress to the file throughout the conversation
+- The file should ALWAYS reflect the current state of the discussion
 - Include sections like:
   - Description (what needs to be built)
   - Requirements
@@ -48,7 +55,12 @@ python .claude/scripts/goal-builder/list_issues.py
   - Target (e.g., `modules/auth/`)
   - Related GitHub Issues
 
-### 3. Write Draft Directly to File IMMEDIATELY
+**The draft file is your LIVE WORKING DOCUMENT - update it constantly!**
+- Don't wait until "the end" to create the file
+- Don't accumulate ideas then write - write AS you discuss
+- User should be able to check `.tmp/goal-draft.md` at ANY point and see current progress
+
+### 3. File Operations During Discussion
 
 **IMPORTANT**: WRITE the draft DIRECTLY to a file in the PROJECT'S temp folder BEFORE asking for approval:
 

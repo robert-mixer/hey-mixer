@@ -6,6 +6,36 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The Mixer System is a conversational AI workflow for transforming ideas into code through structured project management. It uses three specialized Claude agents to process GitHub Issues → Linear Goal Tickets → Linear Plan Tickets → Code Modules.
 
+## 🔴 CRITICAL: AGENT INTERACTION RULES 🔴
+
+### ⚠️ ABSOLUTE RULE #1: You Are NOT The Agent! ⚠️
+**MANDATORY: When running agents via tmux, you are ONLY a relay/intermediary!**
+- **READ IMMEDIATELY:** `.claude/AGENT-INTERACTION-CRITICAL-RULES.md`
+- **YOU CANNOT:** Run agent scripts directly (`python .claude/scripts/...`)
+- **YOU CANNOT:** Access Linear/GitHub APIs yourself
+- **YOU CAN ONLY:** Send messages to agent in tmux and relay responses
+
+### When Coordinating with Agents via tmux:
+**YOU MUST ALWAYS USE AGENT-SPECIFIC SLASH COMMANDS, NOT GENERIC TEXT!**
+
+When running agents through tmux sessions, you are REQUIRED to:
+1. **NEVER run agent scripts yourself** - The agent runs them, not you!
+2. **ALWAYS invoke the agent's slash commands** for any action that has a command
+3. **NEVER send generic text** like "show issues" when `/goal-builder:show-issues` exists
+4. **VERIFY commands are executed** by checking for expected outputs (e.g., `.tmp/goal-draft.md`)
+
+### Command Enforcement Examples:
+- User wants to see issues → Send `/goal-builder:show-issues` NOT "show me issues"
+- User wants to create a goal → Send `/goal-builder:create-goal [numbers]` NOT "create a goal"
+- User wants to analyze → Send `/goal-builder:analyze-issues` NOT "analyze the issues"
+
+### Verification Checklist:
+- [ ] Did I use the exact slash command instead of generic text?
+- [ ] Did the agent create expected files (e.g., `.tmp/goal-draft.md`)?
+- [ ] Did the agent follow its documented workflow?
+
+**FAILURE TO USE COMMANDS = CRITICAL WORKFLOW VIOLATION**
+
 ## Running Agents
 
 ```bash

@@ -8,12 +8,22 @@ allowed-tools: Read, Write, Bash(python:.claude/scripts/goal-builder/*), Grep, G
 
 This skill provides structured workflows and templates for transforming GitHub issues into Linear goal tickets.
 
+## 🔴 CRITICAL: ALWAYS USE YOUR COMMANDS 🔴
+
+**MANDATORY**: You MUST use your slash commands for ALL actions:
+- `/goal-builder:show-issues` - ALWAYS use this to show issues
+- `/goal-builder:analyze-issues` - ALWAYS use this to analyze groupings
+- `/goal-builder:create-goal [issue-numbers]` - ALWAYS use this to create goals
+- `/goal-builder:save-draft` - ALWAYS use this to save drafts
+
+**NEVER** manually list issues or create goals without these commands!
+
 ## Quick Start
 
-1. View open issues: `/goal-builder:show-issues`
-2. Group related issues interactively
-3. Draft goal content WITH the user
-4. Create goal ticket in Linear (status="draft")
+1. Use command: `/goal-builder:show-issues`
+2. Use command: `/goal-builder:analyze-issues` for groupings
+3. Use command: `/goal-builder:create-goal [numbers]` to draft WITH user
+4. Goal created in Linear with status="draft"
 5. User manually changes draft→todo when ready
 
 ## Core Principles
