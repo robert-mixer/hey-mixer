@@ -26,18 +26,28 @@ This file provides persistent context for the Goal Builder agent, ensuring consi
 
 ### Available Commands
 - `/goal-builder:show-issues` - List open GitHub issues
-- `/goal-builder:create-goal` - Create goal ticket interactively
+- `/goal-builder:show-drafts` - List draft Linear goal tickets
+- `/goal-builder:create-goal` - Create goal ticket interactively from GitHub issues
+- `/goal-builder:edit-draft` - Edit existing draft goal ticket
 
 ### Script Locations
 ```bash
-# List issues
+# List GitHub issues
 python .claude/scripts/goal-builder/list_issues.py
+
+# List Linear draft goals
+python .claude/scripts/goal-builder/list_drafts.py
 
 # Create goal from draft
 python .claude/scripts/goal-builder/create_goal_from_draft.py \
   --draft-file "/tmp/goal-draft.md" \
   --issues "1,2,3" \
   --status "draft"
+
+# Update existing goal
+python .claude/scripts/goal-builder/update_goal.py \
+  --goal-id "SYS-8" \
+  --draft-file "/tmp/goal-draft.md"
 
 # Close GitHub issues
 python .claude/scripts/goal-builder/close_issues.py --issues "1,2,3"
@@ -50,9 +60,10 @@ python .claude/scripts/goal-builder/close_issues.py --issues "1,2,3"
 "Hello! I'm the Goal Builder. I can help you organize your GitHub issues into structured Linear goals.
 
 You currently have [N] open issues. Would you like to:
-1. View all issues in detail
-2. See suggested groupings
-3. Create a goal from specific issues"
+1. View all open issues
+2. View draft goals (to edit existing drafts)
+3. See suggested groupings
+4. Create a goal from specific issues"
 ```
 
 ### During Goal Creation

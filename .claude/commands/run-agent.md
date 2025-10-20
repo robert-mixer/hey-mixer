@@ -36,9 +36,11 @@ Run with agent name: `goal-builder`, `plan-builder`, or `module-builder`
 
 #### Goal Builder Commands (MANDATORY USE):
 - `/goal-builder:show-issues` - Display GitHub issues (NOT "show issues")
+- `/goal-builder:show-drafts` - Display draft Linear goal tickets (NOT "show drafts")
 - `/goal-builder:analyze-issues` - Analyze and group issues
 - `/goal-builder:save-draft [filename]` - Save draft to file
 - `/goal-builder:create-goal [issue-numbers]` - Create goal from issues
+- `/goal-builder:edit-draft [goal-id]` - Edit an existing draft goal (NOT "edit draft")
 
 #### Plan Builder Commands (MANDATORY USE):
 - `/plan-builder:show-goals` - Display Linear goals with status="todo"
@@ -53,6 +55,8 @@ Run with agent name: `goal-builder`, `plan-builder`, or `module-builder`
 **⚠️ CRITICAL ENFORCEMENT:**
 - When user asks to "create a goal" → Use `/goal-builder:create-goal`
 - When user asks to "show issues" → Use `/goal-builder:show-issues`
+- When user asks to "show drafts" → Use `/goal-builder:show-drafts`
+- When user asks to "edit a draft" → Use `/goal-builder:edit-draft`
 - When user asks to "make a plan" → Use `/plan-builder:create-plan`
 - NEVER send generic text when a command exists for that action!
 
@@ -174,6 +178,8 @@ tmux capture-pane -t $ARGUMENTS-session -p | tail -30
 
 #### GOAL BUILDER Workflow
 ```bash
+# NEW GOAL FROM GITHUB ISSUES:
+
 # 1. Show issues using COMMAND (no ultrathink) - TWO STEPS!
 tmux send-keys -t goal-builder-session "/goal-builder:show-issues"
 tmux send-keys -t goal-builder-session C-m
@@ -198,6 +204,32 @@ Review the content. Any changes needed?"
 
 # 6. Confirm completion
 "Goal created successfully! Issue #X has been closed."
+
+# EDIT EXISTING DRAFT GOAL:
+
+# 1. Show draft goals using COMMAND - TWO STEPS!
+tmux send-keys -t goal-builder-session "/goal-builder:show-drafts"
+tmux send-keys -t goal-builder-session C-m
+sleep 10
+
+# 2. CHECK WITH USER
+"I found these draft goals: [list]
+Which one would you like to edit?"
+
+# 3. After user selects goal - USE EDIT-DRAFT COMMAND! TWO STEPS!
+tmux send-keys -t goal-builder-session "/goal-builder:edit-draft SYS-X"
+tmux send-keys -t goal-builder-session C-m
+sleep 15
+
+# 4. The agent will load current content and save to .tmp/goal-draft.md
+# CHECK WITH USER
+"Here's the current content. What would you like to change?"
+
+# 5. The agent will iterate with you using Edit tool
+# After you approve, it will update in Linear
+
+# 6. Confirm completion
+"Goal updated successfully in Linear!"
 ```
 
 #### PLAN BUILDER Workflow

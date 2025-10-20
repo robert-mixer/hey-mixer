@@ -458,7 +458,7 @@ class LinearClient:
 
         Args:
             label: Label name (e.g., "goal" or "plan")
-            status: Status name (e.g., "todo", "doing", "done")
+            status: Status name (e.g., "todo", "doing", "done", "draft")
 
         Returns:
             List of matching issues
@@ -478,39 +478,37 @@ class LinearClient:
         }
         linear_status = status_map.get(status.lower(), status)
 
+        # Get all team issues and filter in Python
+        # Linear's filter syntax can be finicky, so we fetch and filter manually
         query = """
-        query ($teamId: String!, $label: String!, $status: String!) {
-            issues(
-                filter: {
-                    team: { id: { eq: $teamId } }
-                    labels: { name: { eq: $label } }
-                    state: { name: { eq: $status } }
-                }
-            ) {
-                nodes {
-                    id
-                    identifier
-                    title
-                    description
-                    url
-                    state {
-                        name
-                    }
-                    labels {
-                        nodes {
-                            name
-                        }
-                    }
-                    parent {
+        query ($teamId: String!) {
+            team(id: $teamId) {
+                issues {
+                    nodes {
                         id
                         identifier
                         title
-                    }
-                    children {
-                        nodes {
+                        description
+                        url
+                        state {
+                            name
+                        }
+                        labels {
+                            nodes {
+                                name
+                            }
+                        }
+                        parent {
                             id
                             identifier
                             title
+                        }
+                        children {
+                            nodes {
+                                id
+                                identifier
+                                title
+                            }
                         }
                     }
                 }
@@ -519,12 +517,29 @@ class LinearClient:
         """
 
         try:
-            data = self._query(query, {
-                "teamId": team_internal_id,
-                "label": label,
-                "status": linear_status
-            })
-            return data.get("issues", {}).get("nodes", [])
+            data = self._query(query, {"teamId": team_internal_id})
+            all_issues = data.get("team", {}).get("issues", {}).get("nodes", [])
+
+            # Filter by label and status in Python
+            filtered_issues = []
+            for issue in all_issues:
+                # Check status
+                state_name = issue.get("state", {}).get("name", "")
+                if state_name.lower() != linear_status.lower():
+                    continue
+
+                # Check label
+                labels = issue.get("labels", {}).get("nodes", [])
+                has_label = any(
+                    l.get("name", "").lower() == label.lower()
+                    for l in labels
+                )
+                if not has_label:
+                    continue
+
+                filtered_issues.append(issue)
+
+            return filtered_issues
 
         except Exception as e:
             self.logger.error(f"Failed to get issues by label and status: {e}")
@@ -569,6 +584,78 @@ class LinearClient:
 
         except Exception as e:
             self.logger.error(f"Failed to link issues: {e}")
+            return False
+
+    def update_issue(
+        self,
+        issue_id: str,
+        title: Optional[str] = None,
+        description: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> bool:
+        """
+        Update an existing issue.
+
+        Args:
+            issue_id: Issue identifier (e.g., "SYS-8")
+            title: New title (optional)
+            description: New description (optional)
+            status: New status name (optional)
+
+        Returns:
+            True if successful, False otherwise
+        """
+        # Get issue to get internal ID
+        issue = self.get_issue(issue_id)
+        if not issue:
+            self.logger.error(f"Issue {issue_id} not found")
+            return False
+
+        input_data = {}
+
+        if title:
+            input_data["title"] = title
+
+        if description:
+            input_data["description"] = description
+
+        if status:
+            state_id = self._get_workflow_state_id(status)
+            if state_id:
+                input_data["stateId"] = state_id
+
+        if not input_data:
+            self.logger.warning("No update data provided")
+            return False
+
+        query = """
+        mutation ($issueId: String!, $input: IssueUpdateInput!) {
+            issueUpdate(id: $issueId, input: $input) {
+                success
+                issue {
+                    id
+                    identifier
+                    title
+                }
+            }
+        }
+        """
+
+        try:
+            data = self._query(query, {
+                "issueId": issue["id"],
+                "input": input_data
+            })
+
+            success = data.get("issueUpdate", {}).get("success", False)
+            if success:
+                updated = data.get("issueUpdate", {}).get("issue", {})
+                self.logger.info(f"Updated issue {updated.get('identifier')}")
+
+            return success
+
+        except Exception as e:
+            self.logger.error(f"Failed to update issue: {e}")
             return False
 
     def close_issue(self, issue_id: str, comment: str = None) -> bool:

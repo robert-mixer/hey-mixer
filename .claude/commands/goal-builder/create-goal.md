@@ -40,6 +40,21 @@ First, get the list of open issues:
 python .claude/scripts/goal-builder/list_issues.py
 ```
 
+### 1.5 Load Full Issue Content (if issue number provided as argument)
+
+**IMPORTANT**: If an issue number was provided as an argument to this command (e.g., `/goal-builder:create-goal 11`), you MUST load the full issue content before drafting:
+
+```bash
+python .claude/scripts/goal-builder/load_issue.py --issue-number 11
+```
+
+This displays the **FULL issue body** (not just the 200-char preview). You need this complete context to draft a comprehensive goal ticket that accurately captures all the requirements from the GitHub issue.
+
+**Why this is critical:**
+- `list_issues.py` only shows 200-char previews for discovery
+- The full issue body contains all the detailed requirements
+- Without loading the full content, you're drafting from incomplete information
+
 ### 2. CONTINUOUSLY Write and Update Draft File During Discussion
 
 **FROM THE VERY FIRST MESSAGE: Start writing to `.tmp/goal-draft.md` IMMEDIATELY!**

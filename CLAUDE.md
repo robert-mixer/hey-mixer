@@ -26,7 +26,9 @@ When running agents through tmux sessions, you are REQUIRED to:
 
 ### Command Enforcement Examples:
 - User wants to see issues → Send `/goal-builder:show-issues` NOT "show me issues"
+- User wants to see draft goals → Send `/goal-builder:show-drafts` NOT "show drafts"
 - User wants to create a goal → Send `/goal-builder:create-goal [numbers]` NOT "create a goal"
+- User wants to edit a draft → Send `/goal-builder:edit-draft [goal-id]` NOT "edit the draft"
 - User wants to analyze → Send `/goal-builder:analyze-issues` NOT "analyze the issues"
 
 ### Verification Checklist:
@@ -49,7 +51,9 @@ When running agents through tmux sessions, you are REQUIRED to:
 
 ### Goal Builder
 - `/goal-builder:show-issues` - Display open GitHub issues
+- `/goal-builder:show-drafts` - Display draft Linear goal tickets
 - `/goal-builder:create-goal` - Interactively create goal ticket from issues
+- `/goal-builder:edit-draft` - Edit an existing draft goal ticket
 
 ### Plan Builder
 - `/plan-builder:show-goals` - Display Linear goals with status="todo"

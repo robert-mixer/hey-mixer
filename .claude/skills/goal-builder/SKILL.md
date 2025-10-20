@@ -11,19 +11,35 @@ This skill provides structured workflows and templates for transforming GitHub i
 ## 🔴 CRITICAL: ALWAYS USE YOUR COMMANDS 🔴
 
 **MANDATORY**: You MUST use your slash commands for ALL actions:
-- `/goal-builder:show-issues` - ALWAYS use this to show issues
+- `/goal-builder:show-issues` - ALWAYS use this to show GitHub issues
+- `/goal-builder:show-drafts` - ALWAYS use this to show draft Linear goals
 - `/goal-builder:analyze-issues` - ALWAYS use this to analyze groupings
-- `/goal-builder:create-goal [issue-numbers]` - ALWAYS use this to create goals
+- `/goal-builder:create-goal [issue-numbers]` - ALWAYS use this to create new goals from issues
+- `/goal-builder:edit-draft [goal-id]` - ALWAYS use this to edit existing draft goals
 - `/goal-builder:save-draft` - ALWAYS use this to save drafts
 
 **NEVER** manually list issues or create goals without these commands!
 
 ## Quick Start
 
-1. Use command: `/goal-builder:show-issues`
+### Creating New Goals from GitHub Issues
+
+1. Use command: `/goal-builder:show-issues` (shows 200-char previews)
 2. Use command: `/goal-builder:analyze-issues` for groupings
 3. Use command: `/goal-builder:create-goal [numbers]` to draft WITH user
+   - Command automatically loads full issue content via `load_issue.py`
+   - Agent sees complete issue body, not just preview
 4. Goal created in Linear with status="draft"
+5. User manually changes draft→todo when ready
+
+### Editing Existing Draft Goals
+
+1. Use command: `/goal-builder:show-drafts` (shows 200-char previews)
+2. User selects which draft to edit
+3. Use command: `/goal-builder:edit-draft [goal-id]` to modify WITH user
+   - Command automatically loads full goal content via `load_goal.py`
+   - Agent sees complete description, not just preview
+4. Goal updated in Linear (stays as "draft")
 5. User manually changes draft→todo when ready
 
 ## Core Principles
@@ -35,10 +51,16 @@ This skill provides structured workflows and templates for transforming GitHub i
 
 ## Workflow Steps
 
-### 1. Analyze GitHub Issues
+### Creating Goals from GitHub Issues
+
+#### 1. Analyze GitHub Issues
 
 ```bash
+# List all open issues (200-char previews)
 python .claude/scripts/goal-builder/list_issues.py
+
+# Load specific issue's FULL content
+python .claude/scripts/goal-builder/load_issue.py --issue-number 11
 ```
 
 Look for logical groupings:
@@ -86,12 +108,48 @@ python .claude/scripts/goal-builder/create_goal_from_draft.py \
   --status "draft"
 ```
 
-### 4. Archive Source Issues
+#### 4. Archive Source Issues
 
 Close GitHub issues that were included:
 ```bash
 python .claude/scripts/goal-builder/close_issues.py --issues "12,15,18"
 ```
+
+### Editing Existing Draft Goals
+
+#### 1. List Draft Goals
+
+```bash
+# List all draft goals (200-char previews)
+python .claude/scripts/goal-builder/list_drafts.py
+```
+
+Shows all Linear goals with status="draft" that can be edited.
+
+#### 2. Load and Edit Draft
+
+Work WITH the user to modify the existing goal content:
+
+```bash
+# Load full goal content from Linear to draft file
+python .claude/scripts/goal-builder/load_goal.py \
+  --goal-id "SYS-8" \
+  --description-only > .tmp/goal-draft.md
+
+# User provides changes
+# Agent iteratively updates the file using Edit tool
+# Updates the exact content back to Linear
+```
+
+#### 3. Update in Linear
+
+```bash
+python .claude/scripts/goal-builder/update_goal.py \
+  --goal-id "SYS-8" \
+  --draft-file ".tmp/goal-draft.md"
+```
+
+The goal stays in "draft" status until user manually changes to "todo".
 
 ## Templates
 

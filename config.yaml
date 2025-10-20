@@ -7,7 +7,7 @@ project:
 # GitHub integration
 github:
   enabled: true
-  repo: "robert-mixer/hey-mixer"
+  repo: "mixer-app/hey-mixer"
 
   stash:
     use_issues: true

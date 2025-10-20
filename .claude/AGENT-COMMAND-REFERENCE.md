@@ -36,6 +36,41 @@ tmux send-keys -t goal-builder-session "/goal-builder:analyze-issues"
 tmux send-keys -t goal-builder-session C-m
 ```
 
+### `/goal-builder:show-drafts`
+**User Intent Triggers:**
+- "show drafts"
+- "list drafts"
+- "draft goals"
+- "view drafts"
+- "see draft goals"
+- "2" (when option 2 is "View draft goals")
+
+**tmux Usage:**
+```bash
+tmux send-keys -t goal-builder-session "/goal-builder:show-drafts"
+tmux send-keys -t goal-builder-session C-m
+```
+
+### `/goal-builder:edit-draft [goal-id]`
+**User Intent Triggers:**
+- "edit draft"
+- "modify goal X"
+- "change goal X"
+- "update draft"
+- "edit goal X"
+
+**CRITICAL WORKFLOW:**
+1. Loads current content from Linear
+2. Writes to `.tmp/goal-draft.md` FIRST
+3. Iterates with user on file content
+4. Updates in Linear only after approval
+
+**tmux Usage:**
+```bash
+tmux send-keys -t goal-builder-session "/goal-builder:edit-draft SYS-8"
+tmux send-keys -t goal-builder-session C-m
+```
+
 ### `/goal-builder:create-goal [issue-numbers]`
 **User Intent Triggers:**
 - "create goal"
@@ -168,7 +203,9 @@ After sending ANY command to an agent, verify:
 
 ### For Goal Builder:
 - [ ] `/goal-builder:show-issues` → Agent displays GitHub issues list
+- [ ] `/goal-builder:show-drafts` → Agent displays Linear draft goals
 - [ ] `/goal-builder:create-goal` → File created at `.tmp/goal-draft.md`
+- [ ] `/goal-builder:edit-draft` → Loads current goal, saves to `.tmp/goal-draft.md`
 - [ ] Draft workflow → Agent uses Read/Write/Edit on `.tmp/goal-draft.md`
 
 ### For Plan Builder:
@@ -195,7 +232,9 @@ tmux send-keys -t session "Analyze this"        # WRONG!
 ```bash
 # Use exact slash commands
 tmux send-keys -t session "/goal-builder:show-issues"      # CORRECT!
+tmux send-keys -t session "/goal-builder:show-drafts"      # CORRECT!
 tmux send-keys -t session "/goal-builder:create-goal 5"    # CORRECT!
+tmux send-keys -t session "/goal-builder:edit-draft SYS-8" # CORRECT!
 tmux send-keys -t session "/goal-builder:analyze-issues"   # CORRECT!
 ```
 

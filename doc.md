@@ -95,9 +95,11 @@ Builder  Module
 6. Guides user to review and approve (draft→todo)
 
 **Key Commands:**
-- `/show-issues` - Display open GitHub issues
-- `/suggest-groupings` - Analyze and group related issues
-- `/create-goal` - Interactive goal creation
+- `/goal-builder:show-issues` - Display open GitHub issues
+- `/goal-builder:show-drafts` - Display draft Linear goal tickets
+- `/goal-builder:analyze-issues` - Analyze and group related issues
+- `/goal-builder:create-goal` - Interactive goal creation from GitHub issues
+- `/goal-builder:edit-draft` - Edit existing draft goal ticket
 
 ### Plan Builder
 
