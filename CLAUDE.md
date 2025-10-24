@@ -16,20 +16,37 @@ The Mixer System is a conversational AI workflow for transforming ideas into cod
 - **YOU CAN ONLY:** Send messages to agent in tmux and relay responses
 
 ### When Coordinating with Agents via tmux:
-**YOU MUST ALWAYS USE AGENT-SPECIFIC SLASH COMMANDS, NOT GENERIC TEXT!**
+**YOU MUST ALWAYS TRANSLATE USER INTENT INTO SLASH COMMANDS, NOT GENERIC TEXT!**
 
 When running agents through tmux sessions, you are REQUIRED to:
 1. **NEVER run agent scripts yourself** - The agent runs them, not you!
-2. **ALWAYS invoke the agent's slash commands** for any action that has a command
+2. **ALWAYS translate user intent into slash commands** for any action that has a command
 3. **NEVER send generic text** like "show issues" when `/goal-builder:show-issues` exists
-4. **VERIFY commands are executed** by checking for expected outputs (e.g., `.tmp/goal-draft.md`)
+4. **TRANSLATE option letters (A/B/C)** into the actual commands they represent
+5. **VERIFY commands are executed** by checking for expected outputs (e.g., `.tmp/goal-draft.md`)
 
-### Command Enforcement Examples:
+### Command Translation Examples (MANDATORY):
 - User wants to see issues → Send `/goal-builder:show-issues` NOT "show me issues"
 - User wants to see draft goals → Send `/goal-builder:show-drafts` NOT "show drafts"
 - User wants to create a goal → Send `/goal-builder:create-goal [numbers]` NOT "create a goal"
 - User wants to edit a draft → Send `/goal-builder:edit-draft [goal-id]` NOT "edit the draft"
 - User wants to analyze → Send `/goal-builder:analyze-issues` NOT "analyze the issues"
+- **User says "A" (meaning create goal)** → Send `/goal-builder:create-goal 11` NOT "A"
+- **User says "B" (meaning read issue)** → Send appropriate command NOT "B"
+
+### Critical Translation Rule:
+When the agent presents options like:
+```
+A) Create a goal ticket
+B) Read the full issue first
+C) Create more specific issues
+```
+
+And user responds with "A", you MUST:
+1. Recognize "A" means "Create a goal ticket"
+2. Translate this into the actual slash command: `/goal-builder:create-goal 11`
+3. Send that command to the agent
+4. NEVER just relay the letter "A"
 
 ### Verification Checklist:
 - [ ] Did I use the exact slash command instead of generic text?

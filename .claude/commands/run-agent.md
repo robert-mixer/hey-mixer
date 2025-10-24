@@ -13,6 +13,39 @@ Run with agent name: `goal-builder`, `plan-builder`, or `module-builder`
 
 ## 🔴 CRITICAL RULES - NEVER FORGET
 
+### -2. ⚡ CHECK FOR AUTO-UPDATE MODE FIRST (BEFORE ANYTHING ELSE!)
+
+**IMMEDIATELY CHECK: Does the user want to skip approval?**
+
+**🚨 THE MOST COMMON PATTERN: "Do X and create/update/push"**
+
+When user says: "Do X [and/then] [create/update/push to Linear]", they want AUTO-UPDATE MODE!
+
+**Examples that TRIGGER auto-update mode:**
+- ❌ **MISSED EXAMPLE:** "Remove the enumeration and push to Linear" → SWITCH TO AUTO-UPDATE
+- "Add more details and create the goal" → SWITCH TO AUTO-UPDATE
+- "Fix the YAML and update it" → SWITCH TO AUTO-UPDATE
+- "Change the title then push it" → SWITCH TO AUTO-UPDATE
+- "Let's do X and create/update to Linear" → SWITCH TO AUTO-UPDATE
+- "Don't ask me again" / "Stop asking for approval" → SWITCH TO AUTO-UPDATE
+- "No need to confirm" / "Just do it automatically" → SWITCH TO AUTO-UPDATE
+
+**How to signal auto-update (mid-workflow):**
+1. Send: "SWITCH TO AUTO-UPDATE MODE: User gave complete instruction including final action."
+2. Then relay the actual instruction
+
+**🔴 FAILURE TO DETECT THIS = USER FRUSTRATION!**
+
+If you miss this pattern and ask for approval when user clearly said "do X and push", you've failed.
+
+**Quick test - Check if ANY of these are true:**
+1. Message includes BOTH an action AND final step (create/update/push)? → AUTO-UPDATE
+2. Message says "don't ask me (again)" or similar? → AUTO-UPDATE
+3. Message says "auto-update" / "skip approval" / "no need to confirm"? → AUTO-UPDATE
+4. Otherwise → Use normal approval workflow
+
+---
+
 ### -1. YOU ARE AN INTERMEDIARY, NOT THE AGENT! (ABSOLUTE HIGHEST PRIORITY!)
 **🚨 CRITICAL: You (Claude Code) are NOT the agent. You are ONLY a relay between the user and the agent running in tmux.**
 
@@ -31,8 +64,8 @@ Run with agent name: `goal-builder`, `plan-builder`, or `module-builder`
 
 **YOU ARE A PUPPET:** You act as the user's hands on the keyboard, typing into the tmux session. The AGENT does all the work, not you! If you try to do the agent's job, you're violating your core function.
 
-### 0. ALWAYS USE AGENT-SPECIFIC SLASH COMMANDS (HIGHEST PRIORITY!)
-**THIS IS THE #1 RULE: You MUST use the agent's slash commands, NOT generic text!**
+### 0. ALWAYS TRANSLATE USER INTENT INTO SLASH COMMANDS (HIGHEST PRIORITY!)
+**THIS IS THE #1 RULE: You MUST translate ALL user intent into the agent's slash commands, NOT generic text!**
 
 #### Goal Builder Commands (MANDATORY USE):
 - `/goal-builder:show-issues` - Display GitHub issues (NOT "show issues")
@@ -52,13 +85,33 @@ Run with agent name: `goal-builder`, `plan-builder`, or `module-builder`
 - `/module-builder:load-plan [plan-id]` - Load and implement plan
 - `/module-builder:mark-complete [plan-id]` - Mark plan/goal as done
 
-**⚠️ CRITICAL ENFORCEMENT:**
+**⚠️ CRITICAL ENFORCEMENT - YOU MUST TRANSLATE:**
 - When user asks to "create a goal" → Use `/goal-builder:create-goal`
 - When user asks to "show issues" → Use `/goal-builder:show-issues`
 - When user asks to "show drafts" → Use `/goal-builder:show-drafts`
 - When user asks to "edit a draft" → Use `/goal-builder:edit-draft`
 - When user asks to "make a plan" → Use `/plan-builder:create-plan`
+- **When user says "A" (after agent offered options A/B/C)** → Translate to the actual command!
+- **When user says informal text** → Translate to the corresponding slash command!
 - NEVER send generic text when a command exists for that action!
+
+**🚨 TRANSLATION EXAMPLES - MANDATORY TO FOLLOW:**
+```
+Scenario 1: Agent offers "A) Create goal B) Read issue C) Create more issues"
+User says: "A"
+YOU MUST SEND: /goal-builder:create-goal 11 (NOT "A")
+
+Scenario 2: User says "show me the issues"
+YOU MUST SEND: /goal-builder:show-issues (NOT "show me the issues")
+
+Scenario 3: User says "let's edit that draft goal"
+YOU MUST SEND: /goal-builder:edit-draft SYS-123 (NOT "let's edit that draft goal")
+
+Scenario 4: User says "yes, approved" (after draft shown)
+YOU CAN SEND: "approved" (no slash command exists for approval)
+```
+
+**The rule is simple: IF a slash command exists for the user's intent, YOU MUST USE IT. ALWAYS.**
 
 ### 1. TWO-STEP COMMAND SENDING (CRITICAL!)
 Claude agents require TWO SEPARATE tmux operations:
@@ -196,14 +249,20 @@ tmux send-keys -t goal-builder-session C-m
 sleep 20
 
 # 4. CHECK WITH USER
-"The agent has written a draft to .tmp/goal-draft.md
+"The agent has written a draft to .tmp/goal-draft.md (v1)
 Review the content. Any changes needed?"
 
 # 5. The agent will iterate with you using Edit tool
-# After you approve, it will create in Linear
+# Each edit creates new version (v2, v3...) AND automatically creates diff files:
+# - v1 → v2 creates .tmp/goal-draft-v1-to-v2.diff
+# - v2 → v3 creates .tmp/goal-draft-v2-to-v3.diff
+# - Agent displays each diff inline automatically
+# If you ask "show diff v1 v4", agent creates that specific diff on demand
+# After you approve, it will create in Linear and clean up all versions
 
 # 6. Confirm completion
-"Goal created successfully! Issue #X has been closed."
+"Goal created successfully! Issue #X has been closed.
+Draft versions, diffs, and version tracker cleaned up."
 
 # EDIT EXISTING DRAFT GOAL:
 
@@ -221,15 +280,21 @@ tmux send-keys -t goal-builder-session "/goal-builder:edit-draft SYS-X"
 tmux send-keys -t goal-builder-session C-m
 sleep 15
 
-# 4. The agent will load current content and save to .tmp/goal-draft.md
+# 4. The agent will load current content and save to .tmp/goal-draft.md (v1)
 # CHECK WITH USER
 "Here's the current content. What would you like to change?"
 
 # 5. The agent will iterate with you using Edit tool
-# After you approve, it will update in Linear
+# Each edit creates new version (v2, v3...) AND automatically creates diff files:
+# - v1 → v2 creates .tmp/goal-draft-v1-to-v2.diff
+# - v2 → v3 creates .tmp/goal-draft-v2-to-v3.diff
+# - Agent displays each diff inline automatically
+# If you ask "show diff v1 v4", agent creates that specific diff on demand
+# After you approve, it will update in Linear and clean up all versions
 
 # 6. Confirm completion
-"Goal updated successfully in Linear!"
+"Goal updated successfully in Linear!
+Draft versions, diffs, and version tracker cleaned up."
 ```
 
 #### PLAN BUILDER Workflow
@@ -450,6 +515,28 @@ tmux send-keys -t session "Create a goal for issue 5"  # WRONG! Use /goal-builde
 
 # DON'T: Jump straight to creation without confirming
 # DON'T: Forget to send C-m separately
+```
+
+### 🚨 REAL INCIDENT: MISSED AUTO-UPDATE PATTERN
+```bash
+# User mid-workflow: "I don't like it, let's remove the enumeration and push to linear"
+
+# ❌ WRONG (what happened):
+tmux send-keys -t session "Please remove the enumeration from the section names, then create this goal in Linear."
+# Result: Agent asked for approval, causing user frustration
+
+# ✅ CORRECT (what should have happened):
+# Step 1: Recognize the "do X and push" pattern
+tmux send-keys -t session "SWITCH TO AUTO-UPDATE MODE: User gave complete instruction including final action."
+tmux send-keys -t session C-m
+sleep 2
+
+# Step 2: Relay the actual instruction
+tmux send-keys -t session "Remove the enumeration from section names and create in Linear."
+tmux send-keys -t session C-m
+# Result: Agent auto-updates without asking for approval
+
+# KEY INSIGHT: "Let's do X and push/create/update" = Complete instruction, not a two-step request!
 ```
 
 ## 🏁 FINAL STEPS

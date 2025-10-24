@@ -40,14 +40,24 @@ python .claude/scripts/goal-builder/list_drafts.py
 
 # Create goal from draft
 python .claude/scripts/goal-builder/create_goal_from_draft.py \
-  --draft-file "/tmp/goal-draft.md" \
+  --draft-file ".tmp/goal-draft.md" \
   --issues "1,2,3" \
   --status "draft"
+
+# Clean up after successful creation
+if [ $? -eq 0 ]; then
+  rm -f .tmp/goal-draft*.md .tmp/goal-version.txt
+fi
 
 # Update existing goal
 python .claude/scripts/goal-builder/update_goal.py \
   --goal-id "SYS-8" \
-  --draft-file "/tmp/goal-draft.md"
+  --draft-file ".tmp/goal-draft.md"
+
+# Clean up after successful update
+if [ $? -eq 0 ]; then
+  rm -f .tmp/goal-draft*.md .tmp/goal-version.txt
+fi
 
 # Close GitHub issues
 python .claude/scripts/goal-builder/close_issues.py --issues "1,2,3"

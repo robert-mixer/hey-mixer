@@ -79,7 +79,10 @@ Build a secure, modern authentication system that provides seamless user access 
 What would you like me to adjust?
 ```
 
-### Step 2: Iterative Refinement
+**IMPORTANT: Consider Examples Section**
+For goals involving user interaction, APIs, voice commands, conversational interfaces, or workflows, ALWAYS include an "Examples" section with 2-10 concrete scenarios showing expected behavior. This dramatically improves clarity for plan builders and module builders.
+
+### Step 2: Iterative Refinement with Version Management
 
 **Common refinement requests:**
 
@@ -88,12 +91,40 @@ What would you like me to adjust?
 - "Include migration from the old system"
 - "Add performance requirements"
 
-**Response approach:**
-```
-Great suggestion! I'll add MFA to the requirements. Here's the updated version:
+**Response approach with version tracking:**
+```bash
+# Before editing: Get current version
+VERSION=$(cat .tmp/goal-version.txt)
+NEXT=$((VERSION + 1))
 
-[Show ONLY the changed section initially, then full draft if requested]
+# Make the edit to .tmp/goal-draft.md
+Edit(.tmp/goal-draft.md) - Add MFA requirement
+
+# After editing: Save version and CREATE DIFF FILE AUTOMATICALLY
+cp .tmp/goal-draft.md .tmp/goal-draft-v${NEXT}.md
+echo "$NEXT" > .tmp/goal-version.txt
+
+# 🔴 CRITICAL: ALWAYS create diff file between consecutive versions
+# This MUST happen for ALL version changes, whether:
+# - User-requested (user asks for changes)
+# - Agent-initiated (you fix formatting, YAML issues, spelling, etc.)
+# IT DOESN'T MATTER WHO INITIATED THE CHANGE - ALWAYS CREATE THE DIFF!
+diff -u .tmp/goal-draft-v${VERSION}.md .tmp/goal-draft-v${NEXT}.md > .tmp/goal-draft-v${VERSION}-to-v${NEXT}.diff
+
+# Display what changed
+echo "📝 Changes from v${VERSION} to v${NEXT}:"
+echo "📄 Diff saved to: .tmp/goal-draft-v${VERSION}-to-v${NEXT}.diff"
+cat .tmp/goal-draft-v${VERSION}-to-v${NEXT}.diff
 ```
+
+**Why Version Management with Automatic Diffs:**
+- ✅ User sees EXACT changes after each edit
+- ✅ Full history in `.tmp/goal-draft-v1.md`, `v2.md`, `v3.md`...
+- ✅ **Automatic diff files**: `.tmp/goal-draft-v1-to-v2.diff`, `v2-to-v3.diff`...
+- ✅ Diffs created for ALL changes (user-requested OR agent-initiated)
+- ✅ Can request specific version diffs on demand: `diff -u .tmp/goal-draft-v2.md .tmp/goal-draft-v5.md > .tmp/goal-draft-v2-to-v5.diff`
+- ✅ Complete observability during iteration
+- ✅ All diffs saved for review at any time
 
 ### Step 3: Final Approval
 
@@ -122,9 +153,15 @@ echo "✅ Draft saved to /tmp/goal-draft.md"
 
 ```bash
 python .claude/scripts/goal-builder/create_goal_from_draft.py \
-  --draft-file "/tmp/goal-draft.md" \
+  --draft-file ".tmp/goal-draft.md" \
   --issues "12,15,18" \
   --status "draft"
+
+# After successful creation, clean up all draft files
+if [ $? -eq 0 ]; then
+  rm -f .tmp/goal-draft*.md .tmp/goal-draft*.diff .tmp/goal-version.txt
+  echo "✅ Cleaned up draft versions, diffs, and version tracker"
+fi
 ```
 
 Expected output:
@@ -134,6 +171,7 @@ Expected output:
 🏷️ Labels: goal
 📊 Status: draft
 🔗 Linked issues: #12, #15, #18
+✅ Cleaned up draft versions
 ```
 
 ### Step 3: Close GitHub Issues
@@ -187,6 +225,12 @@ doing → done: Module implemented and tested (automatic)
 - ✅ Get explicit approval before creating
 - ✅ Explain the workflow clearly
 - ✅ Keep goals achievable (1-2 sprints)
+- ✅ **Include "Examples" section for interactive features** - Voice commands, APIs, chatbots, CLI tools, workflows, or any system where concrete examples clarify behavior
+- ✅ Show 2-10 realistic interaction scenarios in Examples section
+- ✅ **Use ```text language specifier for ALL example code blocks** - This prevents Linear from misinterpreting content as YAML (proven solution)
+- ✅ **ALWAYS wait for explicit user approval before updating Linear/GitHub (NORMAL MODE)** - Even for small fixes, formatting, or diagnostic changes
+
+**⚠️ Note:** In AUTO-UPDATE MODE (when user explicitly requests it via --auto-update flag or mid-workflow switch), proceeding without approval is the INTENDED behavior.
 
 ### DON'T:
 - ❌ Auto-generate generic content
@@ -194,6 +238,125 @@ doing → done: Module implemented and tested (automatic)
 - ❌ Skip the review phase
 - ❌ Combine unrelated issues
 - ❌ Make goals too large or vague
+- ❌ **Skip Examples section when the goal involves user/system interaction**
+- ❌ **Update Linear/GitHub without explicit user approval (NORMAL MODE ONLY)** - NO EXCEPTIONS in normal mode
+
+## 🚨 CRITICAL: Diagnostic Mode and Approval Rules (NORMAL MODE) 🚨
+
+**⚠️ IMPORTANT: These rules apply to NORMAL MODE workflows only.**
+
+In AUTO-UPDATE MODE (when user explicitly requests it), the agent is EXPECTED to proceed without approval - these strict rules do not apply.
+
+### When Fixing Issues in NORMAL MODE (YAML Detection, Formatting, etc.)
+
+Even when diagnosing and fixing issues in existing goals, you MUST follow the full approval workflow:
+
+**The Correct Flow (NORMAL MODE):**
+1. User reports issue (e.g., "Example 2 shows as YAML in Linear")
+2. Load current content from Linear (becomes v1)
+3. Make fix to `.tmp/goal-draft.md`
+4. Save as v2: `cp .tmp/goal-draft.md .tmp/goal-draft-v2.md`
+5. **Create diff automatically**: `diff -u .tmp/goal-draft-v1.md .tmp/goal-draft-v2.md > .tmp/goal-draft-v1-to-v2.diff`
+6. **Show diff to user**
+7. **ASK**: "Would you like me to update this to Linear to test the fix?"
+8. **WAIT for user approval**: "yes" / "approve" / "update it"
+9. **ONLY THEN update to Linear**
+
+**NEVER:**
+- ❌ Update immediately to "test" the fix
+- ❌ Skip approval because it's a "small change"
+- ❌ Accept approval from Claude Code (the relay)
+- ❌ Assume user wants it updated
+
+**ALWAYS:**
+- ✅ Create versions and diffs
+- ✅ Show changes to user
+- ✅ Ask for approval explicitly
+- ✅ Wait for user's approval words
+- ✅ Archive all files after successful update (see Archive System below)
+
+### 🔥 AUTO-UPDATE MODE (Explicit Override)
+
+Users can explicitly request automatic updates without approval prompts using the `--auto-update` flag.
+
+**How It Works:**
+1. User says to Claude Code (the relay): "Fix YAML and auto-update to Linear"
+2. Claude Code detects auto-update intention using natural language understanding
+3. Claude Code invokes command with flag: `/goal-builder:edit-draft SYS-10 --auto-update`
+4. Command file receives arguments: "SYS-10 --auto-update"
+5. Command file instructs agent: "If --auto-update IS present: You are in AUTO-UPDATE MODE"
+6. Agent detects flag in arguments and proceeds without approval
+
+**User Phrases That Trigger Auto-Update:**
+- "auto-update" / "autoupdate"
+- "without asking for approval"
+- "skip approval"
+- "update automatically"
+- "don't ask, just update"
+- "don't ask me more questions"
+- "no need to confirm"
+- "without checking with me"
+- Any phrase expressing intent to bypass approval prompts
+
+**Agent Behavior in Auto-Update Mode:**
+1. ✅ Still create all versions and diffs (transparency)
+2. ✅ Show what's being updated
+3. ✅ State: "🔥 Auto-update mode detected. Updating to Linear immediately..."
+4. ✅ Update to Linear without asking (99% of cases)
+5. ✅ Archive files automatically
+
+**CRITICAL RULES:**
+- ✅ Agent checks for `--auto-update` flag in command arguments
+- ✅ Command file handles flag detection and instructs agent
+- ❌ Agent NEVER assumes auto-update from other context
+- ✅ Even in AUTO-UPDATE MODE, agent MAY ask for clarification if confused
+- ✅ Default is ALWAYS to ask for approval (when no flag present)
+
+### 📦 Archive System (Complete Audit Trail)
+
+**ALL successful Linear updates are automatically archived** - regardless of workflow mode.
+
+**Archive Structure:**
+```
+.tmp/archives/
+  └── SYS-10/
+      ├── 20251022-143022/
+      │   ├── goal-draft-v1.md
+      │   ├── goal-draft-v2.md
+      │   ├── goal-draft-v1-to-v2.diff
+      │   └── goal-version.txt
+      ├── 20251022-151530/
+      │   ├── goal-draft-v1.md
+      │   ├── goal-draft-v2.md
+      │   ├── goal-draft-v3.md
+      │   ├── goal-draft-v1-to-v2.diff
+      │   ├── goal-draft-v2-to-v3.diff
+      │   └── goal-version.txt
+      └── ...
+```
+
+**Benefits:**
+- ✅ Never lose any change history
+- ✅ Review what happened in any session
+- ✅ Compare versions across sessions
+- ✅ Audit trail for all updates
+- ✅ Works for both normal and auto-update modes
+
+**Review Archives:**
+```bash
+# List all sessions for a goal
+ls -la .tmp/archives/SYS-10/
+
+# Review specific session
+ls -la .tmp/archives/SYS-10/20251022-143022/
+
+# View diffs from a session
+cat .tmp/archives/SYS-10/20251022-143022/*.diff
+
+# Compare versions
+diff .tmp/archives/SYS-10/20251022-143022/goal-draft-v1.md \
+     .tmp/archives/SYS-10/20251022-151530/goal-draft-v1.md
+```
 
 ## Troubleshooting
 
@@ -304,26 +467,52 @@ I'll update [section] with that change. Here's the modified version:
 Would you like any other changes, or is this ready to update in Linear?
 ```
 
-#### Step 3: Iterative Refinement
+#### Step 3: Iterative Refinement with Version Management
 
-Use the **Edit tool** to make precise changes:
-- User provides specific change
-- Apply edit to `.tmp/goal-draft.md`
-- Show updated section
-- Continue until user approves
+Use the **Edit tool** to make precise changes with version tracking:
+
+**Process for each edit:**
+```bash
+# Before editing: Get current version
+VERSION=$(cat .tmp/goal-version.txt)
+NEXT=$((VERSION + 1))
+
+# Make the edit to .tmp/goal-draft.md
+Edit(.tmp/goal-draft.md) - Apply user's requested change
+
+# After editing: Save version and CREATE DIFF FILE AUTOMATICALLY
+cp .tmp/goal-draft.md .tmp/goal-draft-v${NEXT}.md
+echo "$NEXT" > .tmp/goal-version.txt
+
+# 🔴 CRITICAL: ALWAYS create diff file between consecutive versions
+# This MUST happen for ALL version changes, whether:
+# - User-requested (user asks for changes)
+# - Agent-initiated (you fix formatting, YAML issues, spelling, etc.)
+# IT DOESN'T MATTER WHO INITIATED THE CHANGE - ALWAYS CREATE THE DIFF!
+diff -u .tmp/goal-draft-v${VERSION}.md .tmp/goal-draft-v${NEXT}.md > .tmp/goal-draft-v${VERSION}-to-v${NEXT}.diff
+
+# Display what changed
+echo "📝 Changes from v${VERSION} to v${NEXT}:"
+echo "📄 Diff saved to: .tmp/goal-draft-v${VERSION}-to-v${NEXT}.diff"
+cat .tmp/goal-draft-v${VERSION}-to-v${NEXT}.diff
+```
+
+**Why Version Management with Automatic Diffs:**
+- ✅ User sees EXACT changes after each edit
+- ✅ Full history in `.tmp/goal-draft-v1.md`, `v2.md`, `v3.md`...
+- ✅ **Automatic diff files**: `.tmp/goal-draft-v1-to-v2.diff`, `v2-to-v3.diff`...
+- ✅ Diffs created for ALL changes (user-requested OR agent-initiated)
+- ✅ Can request specific version diffs on demand
+- ✅ Complete observability during iteration
+- ✅ All diffs saved for review at any time
 
 **Example exchange:**
 ```
 User: "Add OAuth support to requirements"
 
-Agent: "I'll add OAuth to the requirements section:
-
-## Requirements
-- User registration with email validation
-- JWT-based authentication
-- **OAuth 2.0 integration (Google, GitHub)**  ← NEW
-- Password reset via email
-- Rate limiting
+Agent: [Edits file, saves v2, shows diff]
+"📝 Changes from v1 to v2:
++- **OAuth 2.0 integration (Google, GitHub)**
 
 Anything else?"
 
@@ -346,6 +535,12 @@ Ready to update SYS-8 in Linear with these changes?
 python .claude/scripts/goal-builder/update_goal.py \
   --goal-id "SYS-8" \
   --draft-file ".tmp/goal-draft.md"
+
+# After successful update, clean up all draft files
+if [ $? -eq 0 ]; then
+  rm -f .tmp/goal-draft*.md .tmp/goal-draft*.diff .tmp/goal-version.txt
+  echo "✅ Cleaned up draft versions, diffs, and version tracker"
+fi
 ```
 
 **Expected output:**
@@ -353,6 +548,7 @@ python .claude/scripts/goal-builder/update_goal.py \
 ✅ Goal SYS-8 updated successfully!
 📎 Linear URL: https://linear.app/workspace/issue/SYS-8
 📊 Status: Draft (unchanged)
+✅ Cleaned up draft versions
 ```
 
 #### Step 3: Explain Status
@@ -393,8 +589,11 @@ Would you like to:
 | **Load Command** | `load_issue.py` (full body) | `load_goal.py` (full description) |
 | **Source Content** | Draft from full issue | Load from Linear |
 | **Working File** | `.tmp/goal-draft.md` | `.tmp/goal-draft.md` |
+| **Version Files** | `.tmp/goal-draft-v1.md`, `v2.md`... | `.tmp/goal-draft-v1.md`, `v2.md`... |
+| **Version Tracker** | `.tmp/goal-version.txt` | `.tmp/goal-version.txt` |
 | **Save Command** | `create_goal_from_draft.py` | `update_goal.py` |
 | **GitHub Action** | Close issues | None |
+| **Cleanup** | After creation success | After update success |
 | **Final Status** | Draft | Draft (unchanged) |
 
 ### Best Practices (Editing)

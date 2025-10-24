@@ -204,9 +204,11 @@ After sending ANY command to an agent, verify:
 ### For Goal Builder:
 - [ ] `/goal-builder:show-issues` → Agent displays GitHub issues list
 - [ ] `/goal-builder:show-drafts` → Agent displays Linear draft goals
-- [ ] `/goal-builder:create-goal` → File created at `.tmp/goal-draft.md`
-- [ ] `/goal-builder:edit-draft` → Loads current goal, saves to `.tmp/goal-draft.md`
+- [ ] `/goal-builder:create-goal` → File created at `.tmp/goal-draft.md` and `.tmp/goal-draft-v1.md`
+- [ ] `/goal-builder:edit-draft` → Loads current goal, saves to `.tmp/goal-draft.md` and `.tmp/goal-draft-v1.md`
 - [ ] Draft workflow → Agent uses Read/Write/Edit on `.tmp/goal-draft.md`
+- [ ] Version management → Each edit creates new version file with diff display
+- [ ] Cleanup → All `.tmp/goal-draft*.md` files removed after successful Linear operation
 
 ### For Plan Builder:
 - [ ] `/plan-builder:show-goals` → Agent displays Linear goals

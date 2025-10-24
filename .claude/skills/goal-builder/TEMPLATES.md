@@ -23,6 +23,22 @@ Implement a complete [feature] that provides [core value proposition].
 - Security passes [standard]
 - Integration with [system] works
 
+## Examples
+
+> **Note**: Include this section for features involving user interaction, conversational interfaces, voice commands, chatbots, CLI tools, APIs with example requests/responses, or any system where showing concrete examples would clarify behavior.
+
+> Always use ```text language specifier to prevent Linear from misinterpreting examples as YAML.
+
+```text
+User: "Example user input or command"
+
+System: "Example system response or output"
+
+User: "Follow-up interaction"
+
+System: "Follow-up response"
+```
+
 ## Target
 
 `modules/[category]/[feature-name]/` - New [feature] module
@@ -161,3 +177,19 @@ Integrate with [external service/API] to enable [capability].
 3. **Keep it achievable** - Each goal should be completable in 1-2 sprints
 4. **Think modular** - Goals should produce discrete, testable modules
 5. **Consider dependencies** - Note what needs to be built first
+6. **Include Examples when beneficial** - For features involving:
+   - User interactions (voice commands, chat, CLI)
+   - APIs (request/response examples)
+   - Conversational interfaces (chatbots, assistants)
+   - Workflows (multi-step processes)
+   - Any system where concrete examples clarify expected behavior
+
+   ALWAYS include an "Examples" section showing 2-10 realistic interaction scenarios
+7. **Use ```text for all example code blocks** - This prevents Linear from misinterpreting content as YAML. Example:
+   ```text
+   User: "Example input"
+
+   System: "Example response"
+   ```
+
+   **WHY**: Code blocks with `Key: value` patterns (User:, API:, Response:) trigger YAML auto-detection in Linear without explicit language specifiers. Using ```text explicitly tells Linear to render as plain text.

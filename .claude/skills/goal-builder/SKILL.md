@@ -69,9 +69,9 @@ Look for logical groupings:
 - Business priorities
 - Implementation complexity
 
-### 2. Interactive Goal Drafting
+### 2. Interactive Goal Drafting with Version Management
 
-Work WITH the user to write the actual ticket content:
+Work WITH the user to write the actual ticket content. Each iteration is automatically versioned for full observability:
 
 ```markdown
 # [Goal Title]
@@ -90,6 +90,12 @@ Work WITH the user to write the actual ticket content:
 ## Related GitHub Issues
 - #[number]: [title]
 ```
+
+**Version Management:**
+- Initial draft saved as `.tmp/goal-draft-v1.md`
+- Each edit creates new version (v2, v3...)
+- Diffs shown automatically after each change
+- All versions cleaned up after successful creation/update
 
 ### 3. Save and Create
 
@@ -126,9 +132,9 @@ python .claude/scripts/goal-builder/list_drafts.py
 
 Shows all Linear goals with status="draft" that can be edited.
 
-#### 2. Load and Edit Draft
+#### 2. Load and Edit Draft with Version Management
 
-Work WITH the user to modify the existing goal content:
+Work WITH the user to modify the existing goal content. All iterations are versioned:
 
 ```bash
 # Load full goal content from Linear to draft file
@@ -136,8 +142,13 @@ python .claude/scripts/goal-builder/load_goal.py \
   --goal-id "SYS-8" \
   --description-only > .tmp/goal-draft.md
 
+# Initialize versioning (loaded content is v1)
+echo "1" > .tmp/goal-version.txt
+cp .tmp/goal-draft.md .tmp/goal-draft-v1.md
+
 # User provides changes
 # Agent iteratively updates the file using Edit tool
+# Each edit creates new version with automatic diff display
 # Updates the exact content back to Linear
 ```
 
@@ -147,6 +158,11 @@ python .claude/scripts/goal-builder/load_goal.py \
 python .claude/scripts/goal-builder/update_goal.py \
   --goal-id "SYS-8" \
   --draft-file ".tmp/goal-draft.md"
+
+# Clean up versions after successful update
+if [ $? -eq 0 ]; then
+  rm -f .tmp/goal-draft*.md .tmp/goal-version.txt
+fi
 ```
 
 The goal stays in "draft" status until user manually changes to "todo".
