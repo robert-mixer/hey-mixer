@@ -219,18 +219,31 @@ Think of it like this:
    ```
    Example 1 - Explicit "don't ask" phrase:
    User: "approved, and don't ask me for approval anymore"
-   You send to agent: "SWITCH TO AUTO-UPDATE MODE: Skip approval for remaining changes."
+   You send to agent (ONE message): "SWITCH TO AUTO-UPDATE MODE: Skip approval for remaining changes."
+   Then C-m
 
    Example 2 - Direct instruction pattern:
    User: "Change section names and create in Linear"
-   You send to agent: "SWITCH TO AUTO-UPDATE MODE: User gave complete instruction including final action."
-   Then: "Change section names and create in Linear"
+   You send to agent (ONE message): "SWITCH TO AUTO-UPDATE MODE: Change section names and create in Linear."
+   Then C-m
+   ❌ WRONG: Sending "SWITCH TO AUTO-UPDATE MODE: User gave complete instruction including final action." with C-m, THEN sending the instruction
+   ✅ CORRECT: Include the FULL instruction after the signal in ONE message
 
-   Example 3 - Combined signals:
+   Example 3 - Direct instruction with specifics:
+   User: "Change numbering to letters and push to Linear"
+   You send to agent (ONE message): "SWITCH TO AUTO-UPDATE MODE: Change the section numbering to use letters (A, B, C) instead of numbers (1, 2, 3), then create this goal in Linear."
+   Then C-m
+
+   Example 4 - Combined signals:
    User: "Fix the YAML issue, then proceed directly to update in Linear - no need to show me again"
-   You send to agent: "SWITCH TO AUTO-UPDATE MODE: Skip approval for remaining changes."
-   Then: "Fix the YAML issue and update in Linear"
+   You send to agent (ONE message): "SWITCH TO AUTO-UPDATE MODE: Fix the YAML issue and update in Linear."
+   Then C-m
    ```
+
+   **🚨 CRITICAL RULE: NEVER send C-m between the signal and the instruction!**
+   - The signal ("SWITCH TO AUTO-UPDATE MODE:") and the instruction MUST be in ONE message
+   - Send C-m ONLY AFTER the complete message is ready
+   - If you split into two messages, the agent only gets the signal and guesses what to do
 
    Agent will recognize this signal and switch to auto-update mode for the rest of the session.
 

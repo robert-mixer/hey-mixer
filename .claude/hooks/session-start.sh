@@ -23,24 +23,46 @@ add_file_content() {
 # Load all critical instruction files
 echo "Loading critical instruction files..." >&2
 
+# Get the project root directory (where .claude lives)
+PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+
 # 1. Main project instructions
-add_file_content "$CLAUDE_PROJECT_DIR/CLAUDE.md"
+add_file_content "${PROJECT_ROOT}/CLAUDE.md"
 
 # 2. Critical agent interaction rules
-add_file_content "$CLAUDE_PROJECT_DIR/.claude/AGENT-INTERACTION-CRITICAL-RULES.md"
+add_file_content "${PROJECT_ROOT}/.claude/AGENT-INTERACTION-CRITICAL-RULES.md"
 
 # 3. Run-agent command (complete interaction guide)
-add_file_content "$CLAUDE_PROJECT_DIR/.claude/commands/run-agent.md"
+add_file_content "${PROJECT_ROOT}/.claude/commands/run-agent.md"
 
 # 4. Goal-builder context
-add_file_content "$CLAUDE_PROJECT_DIR/.claude/goal-builder-context.md"
+add_file_content "${PROJECT_ROOT}/.claude/goal-builder-context.md"
 
-# Output JSON with all combined content
-cat <<EOF
-{
+# Create the message header
+MESSAGE_HEADER="🔴 CRITICAL INSTRUCTIONS LOADED AT SESSION START 🔴
+
+The following instruction files have been automatically loaded and MUST be followed:
+
+✅ CLAUDE.md - Main project instructions
+✅ AGENT-INTERACTION-CRITICAL-RULES.md - Agent interaction rules (CHECK FOR AUTO-UPDATE PATTERNS!)
+✅ run-agent.md - Complete agent interaction guide
+✅ goal-builder-context.md - Goal builder context
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+"
+
+MESSAGE_FOOTER="
+
+🚨 REMEMBER: Check for auto-update patterns (\"do X and push/create/update\") BEFORE every agent interaction!"
+
+# Combine and properly escape for JSON using jq
+FULL_MESSAGE="${MESSAGE_HEADER}${COMBINED_CONTENT}${MESSAGE_FOOTER}"
+
+# Output JSON with properly escaped content
+jq -n --arg msg "$FULL_MESSAGE" '{
   "hookSpecificOutput": {
     "hookEventName": "SessionStart",
-    "additionalContext": "🔴 CRITICAL INSTRUCTIONS LOADED AT SESSION START 🔴\n\nThe following instruction files have been automatically loaded and MUST be followed:\n\n✅ CLAUDE.md - Main project instructions\n✅ AGENT-INTERACTION-CRITICAL-RULES.md - Agent interaction rules (CHECK FOR AUTO-UPDATE PATTERNS!)\n✅ run-agent.md - Complete agent interaction guide\n✅ goal-builder-context.md - Goal builder context\n\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n$COMBINED_CONTENT\n\n🚨 REMEMBER: Check for auto-update patterns (\"do X and push/create/update\") BEFORE every agent interaction!"
+    "additionalContext": $msg
   }
-}
-EOF
+}'

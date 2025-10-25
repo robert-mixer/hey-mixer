@@ -144,6 +144,25 @@ Sometimes you start in NORMAL MODE but the user later decides they want to skip 
 5. ✅ Update to Linear immediately on all future changes
 6. ✅ This switch lasts for the ENTIRE session (until Linear update completes)
 
+**🚨 CRITICAL: AUTO-UPDATE MODE ACKNOWLEDGMENT WORKFLOW 🚨**
+
+Even in AUTO-UPDATE MODE (whether from --auto-update flag or mid-workflow switch), you MUST follow this sequence:
+
+**WHY THIS MATTERS:**
+The "SWITCH TO AUTO-UPDATE MODE:" signal will include the complete instruction in the same message (e.g., "SWITCH TO AUTO-UPDATE MODE: Change section numbering to letters (A, B, C) and create in Linear"). You must:
+1. ✅ Acknowledge auto-update mode is active
+2. ✅ Make the requested changes to the draft
+3. ✅ Show the diff of what changed
+4. ✅ **THEN** clearly announce: "🔥 Auto-update mode active. Creating/Updating to Linear immediately..."
+5. ✅ **ONLY THEN** execute the create/update script
+
+**The acknowledgment-then-execute pattern is MANDATORY because:**
+- The final instruction often includes changes to make before updating
+- You must complete those changes first
+- You must announce the action before executing it
+- ❌ NEVER execute the Linear update script without first announcing the action
+- ❌ NEVER skip making the requested changes before updating
+
 **How the switch works:**
 - When you receive "SWITCH TO AUTO-UPDATE MODE: [message]" signal, acknowledge and switch behavior
 - This signal indicates the user has explicitly requested to skip future approvals
@@ -151,16 +170,22 @@ Sometimes you start in NORMAL MODE but the user later decides they want to skip 
 
 **Example mid-workflow switching:**
 ```
-You: "Should I update to Linear?"
-User: "approved"
-[You update to Linear]
-
+Scenario 1 - Simple "don't ask again" signal:
 You: "Should I update to Linear?"
 [You receive]: "SWITCH TO AUTO-UPDATE MODE: Skip approval for remaining changes."
 You: "🔄 Switching to auto-update mode. I'll update directly without asking for the rest of this session."
 [You make next change]
 You: "🔥 Auto-update mode active. Updating to Linear immediately..."
 [You update without asking]
+
+Scenario 2 - Signal includes complete instruction (MOST COMMON):
+You: "Should I update to Linear?"
+[You receive]: "SWITCH TO AUTO-UPDATE MODE: Change section numbering to use letters (A, B, C) instead of numbers (1, 2, 3), then create this goal in Linear."
+You: "🔄 Switching to auto-update mode. I'll make the changes and update directly without asking."
+[You edit the draft to change numbers to letters]
+[You create new version and show diff]
+You: "🔥 Auto-update mode active. Creating goal in Linear immediately..."
+[You create in Linear without asking]
 ```
 
 ## 🔴 CRITICAL: LOAD INSTRUCTIONS AT STARTUP 🔴

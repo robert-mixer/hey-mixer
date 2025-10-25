@@ -234,6 +234,25 @@ Even if you start in NORMAL MODE (no --auto-update flag), you can switch to AUTO
 - This signal indicates the user has explicitly requested to skip future approvals
 - The switch lasts for the entire session (until Linear update completes)
 
+**🚨 CRITICAL: AUTO-UPDATE MODE NEVER DIRECTLY UPDATES WITHOUT ACKNOWLEDGMENT 🚨**
+
+Even in AUTO-UPDATE MODE, you MUST follow this sequence:
+
+**WHY THIS MATTERS:**
+After switching to auto-update mode, the user typically provides ONE MORE instruction with final changes (e.g., "add examples section and update in Linear"). You must:
+1. ✅ Acknowledge: "🔥 Auto-update mode active. I'll [make changes] and update to Linear immediately."
+2. ✅ Make the requested changes to `.tmp/goal-draft.md`
+3. ✅ Create new version and show the diff
+4. ✅ **THEN** clearly state: "🔥 Auto-update mode active. Updating to Linear immediately..."
+5. ✅ **ONLY THEN** execute the `update_goal.py` script
+
+**The acknowledgment-then-execute pattern is MANDATORY because:**
+- The final instruction often includes changes to make before updating
+- You must complete those changes first
+- You must announce the action before executing it
+- ❌ NEVER execute the update script without first announcing the action
+- ❌ NEVER skip making the requested changes before updating
+
 ```bash
 # Update the Linear goal with the new draft content
 python .claude/scripts/goal-builder/update_goal.py \

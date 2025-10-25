@@ -31,8 +31,14 @@ When user says: "Do X [and/then] [create/update/push to Linear]", they want AUTO
 - "No need to confirm" / "Just do it automatically" → SWITCH TO AUTO-UPDATE
 
 **How to signal auto-update (mid-workflow):**
-1. Send: "SWITCH TO AUTO-UPDATE MODE: User gave complete instruction including final action."
-2. Then relay the actual instruction
+Send ONE complete message containing BOTH the signal AND the full instruction:
+```bash
+tmux send-keys -t session "SWITCH TO AUTO-UPDATE MODE: [Complete specific instruction including what to change and final action]"
+tmux send-keys -t session C-m  # Send C-m ONLY AFTER the complete message
+```
+Example: `"SWITCH TO AUTO-UPDATE MODE: Change section numbering to use letters (A, B, C) instead of numbers (1, 2, 3), then create this goal in Linear."`
+
+**CRITICAL:** NEVER split into two messages with C-m in between! The agent must receive the complete instruction in one message.
 
 **🔴 FAILURE TO DETECT THIS = USER FRUSTRATION!**
 
@@ -404,6 +410,48 @@ tmux send-keys -t session C-d
 tmux kill-session -t session
 ```
 
+### 📜 Capturing Full Conversation History
+
+**When user says "show me full conversation" or "save the conversation":**
+
+You MUST capture the ENTIRE tmux session history to a timestamped file in `.tmp/`.
+
+```bash
+# Create timestamp and filename
+TIMESTAMP=$(date +"%Y%m%d-%H%M%S")
+AGENT_NAME="$ARGUMENTS"  # goal-builder, plan-builder, or module-builder
+SESSION_NAME="${AGENT_NAME}-session"
+OUTPUT_FILE=".tmp/${AGENT_NAME}-conversation-${TIMESTAMP}.txt"
+
+# Ensure .tmp directory exists
+mkdir -p .tmp
+
+# Capture the FULL scrollback buffer (entire conversation history)
+tmux capture-pane -t "$SESSION_NAME" -p -S - > "$OUTPUT_FILE"
+
+# Confirm to user
+echo "✅ Full conversation history saved to: $OUTPUT_FILE"
+echo "📊 File size: $(wc -l < "$OUTPUT_FILE") lines"
+echo "📄 View with: cat $OUTPUT_FILE"
+echo "🔍 Search with: grep 'pattern' $OUTPUT_FILE"
+```
+
+**Key tmux options explained:**
+- `-p` - Print to stdout (instead of copying to clipboard)
+- `-S -` - Start from the beginning of scrollback history (captures EVERYTHING)
+- Without `-S -`, you only get the visible pane (not the full history)
+
+**File naming convention:**
+- Format: `{agent-name}-conversation-{timestamp}.txt`
+- Example: `goal-builder-conversation-20251024-143522.txt`
+- Timestamp format: `YYYYMMDD-HHMMSS`
+
+**User can then:**
+- Review the entire conversation: `cat .tmp/goal-builder-conversation-20251024-143522.txt`
+- Search for specific parts: `grep "SWITCH TO AUTO-UPDATE" .tmp/goal-builder-conversation-*.txt`
+- Compare multiple sessions: `diff .tmp/goal-builder-conversation-20251024-143522.txt .tmp/goal-builder-conversation-20251024-151030.txt`
+- Archive for reference: Sessions are preserved in `.tmp/` for future review
+
 ### Monitoring Output
 ```bash
 # Full capture
@@ -519,24 +567,27 @@ tmux send-keys -t session "Create a goal for issue 5"  # WRONG! Use /goal-builde
 
 ### 🚨 REAL INCIDENT: MISSED AUTO-UPDATE PATTERN
 ```bash
-# User mid-workflow: "I don't like it, let's remove the enumeration and push to linear"
+# User mid-workflow: "I don't like it, let's change numbering to letters and push to linear"
 
 # ❌ WRONG (what happened):
-tmux send-keys -t session "Please remove the enumeration from the section names, then create this goal in Linear."
-# Result: Agent asked for approval, causing user frustration
-
-# ✅ CORRECT (what should have happened):
-# Step 1: Recognize the "do X and push" pattern
+# Sent TWO separate messages with C-m in between:
 tmux send-keys -t session "SWITCH TO AUTO-UPDATE MODE: User gave complete instruction including final action."
-tmux send-keys -t session C-m
+tmux send-keys -t session C-m  # ❌ SENT TOO EARLY!
 sleep 2
-
-# Step 2: Relay the actual instruction
-tmux send-keys -t session "Remove the enumeration from section names and create in Linear."
+tmux send-keys -t session "Change numbering to letters and create in Linear."
 tmux send-keys -t session C-m
-# Result: Agent auto-updates without asking for approval
+# Result: Agent only got first message, made wrong changes (removed numbering instead of changing to letters)
 
-# KEY INSIGHT: "Let's do X and push/create/update" = Complete instruction, not a two-step request!
+# ✅ CORRECT (what should happen):
+# Send ONE complete message with both the signal AND the instruction, THEN send C-m once
+tmux send-keys -t session "SWITCH TO AUTO-UPDATE MODE: Change the numbering style to use letters (A, B, C) instead of numbers (1, 2, 3), then create this goal in Linear."
+tmux send-keys -t session C-m  # ✅ Send C-m ONLY AFTER complete message
+# Result: Agent gets complete instruction and executes correctly
+
+# KEY INSIGHTS:
+# 1. "Let's do X and push/create/update" = Complete instruction, not a two-step request!
+# 2. NEVER send C-m between the signal and the instruction - combine them in ONE message!
+# 3. Be SPECIFIC about what you want (e.g., "letters A, B, C" not just "letters")
 ```
 
 ## 🏁 FINAL STEPS

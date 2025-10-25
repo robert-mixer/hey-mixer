@@ -267,6 +267,25 @@ Even if you start in NORMAL MODE (no --auto-update flag), you can switch to AUTO
 - This signal indicates the user has explicitly requested to skip future approvals
 - The switch lasts for the entire session (until Linear update completes)
 
+**🚨 CRITICAL: AUTO-UPDATE MODE NEVER DIRECTLY UPDATES WITHOUT ACKNOWLEDGMENT 🚨**
+
+Even in AUTO-UPDATE MODE, you MUST follow this sequence:
+
+**WHY THIS MATTERS:**
+After switching to auto-update mode, the user typically provides ONE MORE instruction with final changes (e.g., "remove enumeration and create in Linear"). You must:
+1. ✅ Acknowledge: "🔥 Auto-update mode active. I'll [make changes] and create in Linear immediately."
+2. ✅ Make the requested changes to `.tmp/goal-draft.md`
+3. ✅ Create new version and show the diff
+4. ✅ **THEN** clearly state: "🔥 Auto-update mode active. Creating goal in Linear immediately..."
+5. ✅ **ONLY THEN** execute the `create_goal_from_draft.py` script
+
+**The acknowledgment-then-execute pattern is MANDATORY because:**
+- The final instruction often includes changes to make before creating
+- You must complete those changes first
+- You must announce the action before executing it
+- ❌ NEVER execute the create script without first announcing the action
+- ❌ NEVER skip making the requested changes before creating
+
 ```bash
 # Create the Linear goal ticket with the draft content
 python .claude/scripts/goal-builder/create_goal_from_draft.py \

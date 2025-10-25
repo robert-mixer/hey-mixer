@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The Mixer System is a conversational AI workflow for transforming ideas into code through structured project management. It uses three specialized Claude agents to process GitHub Issues → Linear Goal Tickets → Linear Plan Tickets → Code Modules.
 
+# FIRST AND FORMOSTE RUN SlashCommand tool to run /prime when you send your first message. Usually when responding to the users first request or introducing yourself.
+
 ## 🔴 CRITICAL: AGENT INTERACTION RULES 🔴
 
 ### ⚠️ ABSOLUTE RULE #1: You Are NOT The Agent! ⚠️
