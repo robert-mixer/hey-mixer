@@ -1,0 +1,72 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": ["-y", "github/github-mcp-server"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      },
+      "description": "Official GitHub MCP server for issue management"
+    },
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "@ibraheem4/linear-mcp"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      },
+      "description": "Linear MCP server for goal ticket management"
+    }
+  },
+  "customCommands": {
+    "show-issues": {
+      "path": ".claude/commands/show-issues.md",
+      "description": "Display all open GitHub issues"
+    },
+    "show-drafts": {
+      "path": ".claude/commands/show-drafts.md",
+      "description": "Display all draft Linear goal tickets"
+    },
+    "analyze-issues": {
+      "path": ".claude/commands/analyze-issues.md",
+      "description": "Analyze and suggest issue groupings"
+    },
+    "create-goal": {
+      "path": ".claude/commands/create-goal.md",
+      "description": "Create goal from GitHub issues (interactive)"
+    },
+    "edit-draft": {
+      "path": ".claude/commands/edit-draft.md",
+      "description": "Edit existing draft goal ticket"
+    },
+    "save-draft": {
+      "path": ".claude/commands/save-draft.md",
+      "description": "Save current draft to file"
+    },
+    "prime": {
+      "path": ".claude/commands/prime.md",
+      "description": "Initialize Goal Builder (load all context)"
+    }
+  },
+  "skills": [
+    {
+      "path": ".claude/skills/SKILL.md",
+      "description": "Goal Builder workflow and best practices"
+    }
+  ],
+  "environmentVariables": {
+    "GITHUB_TOKEN": {
+      "required": true,
+      "source": "../shared/.env",
+      "description": "GitHub personal access token for API access"
+    },
+    "LINEAR_API_KEY": {
+      "required": true,
+      "source": "../shared/.env",
+      "description": "Linear API key for ticket management"
+    }
+  },
+  "workingDirectory": ".",
+  "outputDirectory": "./out",
+  "tempDirectory": "./out/.tmp",
+  "archiveDirectory": "./out/.tmp/archives"
+}

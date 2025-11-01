@@ -1,0 +1,82 @@
+{
+  "customCommands": {
+    "prime": {
+      "path": ".claude/commands/prime.md",
+      "description": "Initialize Orchestrator (load all context) - RUN THIS FIRST!"
+    },
+    "load-agent-context": {
+      "path": ".claude/commands/load-agent-context.md",
+      "description": "Load specific agent's documentation and commands"
+    }
+  },
+  "skills": [
+    {
+      "path": ".claude/skills/SKILL.md",
+      "description": "Orchestrator coordination quick reference"
+    }
+  ],
+  "agents": {
+    "goal-builder": {
+      "path": "../goal-builder",
+      "description": "Creates/edits Linear goal tickets from GitHub issues. Can combine multiple issues into one goal, edit existing drafts, and innovate on requirements.",
+      "input": "GitHub issues (raw ideas), existing Linear goal drafts",
+      "output": "Linear goals (status=draft)",
+      "capabilities": [
+        "Create goals from single or multiple issues",
+        "Edit and refine existing goal drafts",
+        "Analyze and suggest issue groupings",
+        "Innovate on existing goals with new requirements",
+        "Version management with automatic diffs"
+      ],
+      "commands": [
+        "/prime",
+        "/show-issues",
+        "/show-drafts",
+        "/analyze-issues",
+        "/create-goal [numbers] [--auto-update]",
+        "/edit-draft [goal-id] [--auto-update]",
+        "/save-draft [filename]"
+      ]
+    },
+    "plan-builder": {
+      "path": "../plan-builder",
+      "description": "Creates/refines implementation plans from Linear goals. Designs technical approaches, breaks down tasks, and iterates on plan drafts.",
+      "input": "Linear goals (status=todo), existing Linear plan drafts",
+      "output": "Linear plans (status=draft)",
+      "capabilities": [
+        "Create plans from Linear goals",
+        "Edit and refine existing plan drafts",
+        "Analyze goals and suggest approaches",
+        "Design architecture and specifications",
+        "Update plans based on changing requirements"
+      ],
+      "commands": [
+        "/prime",
+        "/show-goals",
+        "/analyze-goal [goal-id]",
+        "/create-plan [goal-id] [--auto-update]"
+      ]
+    },
+    "module-builder": {
+      "path": "../module-builder",
+      "description": "Implements/updates feature code modules from Linear plans. Can create new modules, update existing ones, fix bugs, and refactor.",
+      "input": "Linear plans (status=todo), existing code modules",
+      "output": "Feature code in modules/",
+      "capabilities": [
+        "Implement features from plans",
+        "Update and refine existing modules",
+        "Fix bugs in modules",
+        "Refactor based on new requirements",
+        "Mark plans and goals as complete"
+      ],
+      "commands": [
+        "/prime",
+        "/show-plans",
+        "/load-plan [plan-id]",
+        "/mark-complete [plan-id]"
+      ]
+    }
+  },
+  "workingDirectory": ".",
+  "tempDirectory": ".tmp"
+}
